@@ -37,6 +37,7 @@ function yzen_init() {
     $yzen_options['yzexcludecontentlist'] = esc_textarea("<!--more-->\n<p><\/p>\n<p>&nbsp;<\/p>");
     $yzen_options['yzqueryselect'] = "Все таксономии, кроме исключенных";
     $yzen_options['yztaxlist'] = "";
+    $yzen_options['yztaxnewslist'] = "";
     $yzen_options['yzaddtaxlist'] = "";
     $yzen_options['yzexcerpt'] = "disabled";
     $yzen_options['yzexcludedefault'] = "disabled";
@@ -170,6 +171,7 @@ if ( ! wp_verify_nonce( $_POST['yzen_nonce'], plugin_basename(__FILE__) ) || ! c
 
     $yzen_options['yzqueryselect'] = sanitize_text_field($_POST['yzqueryselect']);
     $yzen_options['yztaxlist'] = esc_textarea($_POST['yztaxlist']);
+    $yzen_options['yztaxnewslist'] = esc_textarea($_POST['yztaxnewslist']);
     $yzen_options['yzaddtaxlist'] = esc_textarea($_POST['yzaddtaxlist']);
     if(isset($_POST['yzexcerpt'])){$yzen_options['yzexcerpt'] = sanitize_text_field($_POST['yzexcerpt']);}else{$yzen_options['yzexcerpt'] = 'disabled';}
     if(isset($_POST['yzexcludedefault'])){$yzen_options['yzexcludedefault'] = sanitize_text_field($_POST['yzexcludedefault']);}else{$yzen_options['yzexcludedefault'] = 'disabled';}
@@ -414,6 +416,16 @@ if ( ! wp_verify_nonce( $_POST['yzen_nonce'], plugin_basename(__FILE__) ) || ! c
                     </small>
                 </td>
             </tr>
+
+            <tr class="yztaxnewslisttr">
+                <th>Таксономии с новостями:</th>
+                <td>
+                    <textarea rows="3" cols="60" name="yztaxnewslist" id="yztaxnewslist"><?php echo stripslashes($yzen_options['yztaxnewslist']); ?></textarea>
+                    <br /><small>Используемый формат: <strong>1,2,3</strong><br />
+                    Пример: <code>1,2,4</code> - ID категорий, которые являются новостями <br />
+                </td>
+            </tr>
+
             <tr class="yzaddtaxlisttr">
                 <th><?php _e("Таксономии для добавления:", 'rss-for-yandex-zen') ?></th>
                 <td>
@@ -769,6 +781,9 @@ $tax_query = array();
 
 $yzqueryselect = $yzen_options['yzqueryselect'];
 $yztaxlist = $yzen_options['yztaxlist'];
+$yztaxnewslist = $yzen_options['yztaxnewslist'];
+$arr_yztaxnewslist = (!empty($yzen_options['yztaxnewslist'])) ? explode(",", $yztaxnewslist) : [];
+
 $yzaddtaxlist = $yzen_options['yzaddtaxlist'];
 
 if ($yzqueryselect=='Все таксономии, кроме исключенных' && $yztaxlist) {
@@ -852,6 +867,15 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'.PHP_EO
         <?php $yzcategory = get_post_meta(get_the_ID(), 'yzcategory_meta_value', true); ?>
         <?php if ($yzcategory) { echo '<category>'.$yzcategory.'</category>'.PHP_EOL; }
         else {echo '<category>'.$yzen_options['yzcategory'].'</category>'.PHP_EOL;} ?>
+        <?php
+        $post_cat = get_the_category();
+        $arr_post_cat_id = [];
+        foreach ($post_cat as $cat) {
+        	$arr_post_cat_id[] = $cat->term_id;
+        }
+        $result_yztaxnewslist = array_intersect($arr_post_cat_id, $arr_yztaxnewslist );
+        ?>
+        <?php if(count($result_yztaxnewslist) == 0): ?><category>evergreen</category><?php endif; ?>
         <?php
         if ($yzthumbnail=="enabled" && has_post_thumbnail( get_the_ID() )) {
             echo '<enclosure url="' . strtok(get_the_post_thumbnail_url(get_the_ID(),$yzselectthumb), '?') . '" type="'.yzen_mime_type(strtok(get_the_post_thumbnail_url(get_the_ID(),$yzselectthumb), '?')).'"/>'.PHP_EOL;
@@ -1213,6 +1237,7 @@ if (!isset($yzen_options['yzexcludecontentlist'])) {$yzen_options['yzexcludecont
 if (!isset($yzen_options['yzmediascope'])) {$yzen_options['yzmediascope']="";update_option('yzen_options', $yzen_options);}
 if (!isset($yzen_options['yzqueryselect'])) {$yzen_options['yzqueryselect']="Все таксономии, кроме исключенных";update_option('yzen_options', $yzen_options);}
 if (!isset($yzen_options['yztaxlist'])) {$yzen_options['yztaxlist']="";update_option('yzen_options', $yzen_options);}
+if (!isset($yzen_options['yztaxnewslist'])) {$yzen_options['yztaxnewslist']="";update_option('yzen_options', $yzen_options);}
 if (!isset($yzen_options['yzaddtaxlist'])) {$yzen_options['yzaddtaxlist']="";update_option('yzen_options', $yzen_options);}
 if (!isset($yzen_options['yzexcerpt'])) {$yzen_options['yzexcerpt']="disabled";update_option('yzen_options', $yzen_options);}
 if (!isset($yzen_options['yzexcludedefault'])) {$yzen_options['yzexcludedefault']="disabled";update_option('yzen_options', $yzen_options);}
