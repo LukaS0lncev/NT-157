@@ -3,7 +3,7 @@
 Plugin Name: RSS for Yandex Zen
 Plugin URI: https://wordpress.org/plugins/rss-for-yandex-zen/
 Description: Создание RSS-ленты для сервиса Яндекс.Дзен.
-Version: 1.26
+Version: 1.26.1
 Author: Flector
 Author URI: https://profiles.wordpress.org/flector#content-plugins
 Text Domain: rss-for-yandex-zen
@@ -875,7 +875,7 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'.PHP_EO
         }
         $result_yztaxnewslist = array_intersect($arr_post_cat_id, $arr_yztaxnewslist );
         ?>
-        <?php if(count($result_yztaxnewslist) == 0): ?><category>evergreen</category><?php endif; ?>
+        <?php if(count($result_yztaxnewslist) == 0){echo '<category>evergreen</category>'.PHP_EOL;} ?>
         <?php
         if ($yzthumbnail=="enabled" && has_post_thumbnail( get_the_ID() )) {
             echo '<enclosure url="' . strtok(get_the_post_thumbnail_url(get_the_ID(),$yzselectthumb), '?') . '" type="'.yzen_mime_type(strtok(get_the_post_thumbnail_url(get_the_ID(),$yzselectthumb), '?')).'"/>'.PHP_EOL;
